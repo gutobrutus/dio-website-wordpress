@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  bd:
+    image: mysql:${MYSQL_TAG}
+    container_name: bd
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${WP_DB_NAME}
+      MYSQL_USER: ${WP_DB_USER}
+      MYSQL_PASSWORD: ${WP_DB_PSW}
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - wp
+  
+  wordpress:
+    depends_on:
+      - bd
+    image: wordpress:${WORDPRESS_TAG}
+    container_name: wordpress
+    restart: unless-stopped
+    environment:
+      WORDPRESS_DB_HOST: bd
+      WORDPRESS_DB_USER: ${WP_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WP_DB_PSW}
+      WORDPRESS_DB_NAME: ${WP_DB_NAME}
+    ports:
+      - 8080:80
+    volumes:
+      - wordpress:/var/www/html
+    networks:
+      - wp
+    
+volumes:
+  wordpress:
+  dbdata:
+
+networks:
+  wp:
+    driver: bridge
